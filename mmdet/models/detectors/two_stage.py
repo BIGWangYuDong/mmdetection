@@ -9,6 +9,7 @@ from torch import Tensor
 from mmdet.registry import MODELS
 from mmdet.structures import SampleList
 from mmdet.utils import ConfigType, OptConfigType, OptMultiConfig
+from mmdet.visualization import featmap_vis
 from .base import BaseDetector
 
 
@@ -107,10 +108,10 @@ class TwoStageDetector(BaseDetector):
             tuple[Tensor]: Multi-level features that may have
             different resolutions.
         """
-        x = self.backbone(batch_inputs)
+        x, feature_maps = self.backbone(batch_inputs)
         if self.with_neck:
             x = self.neck(x)
-        return x
+        return x, feature_maps
 
     def _forward(self, batch_inputs: Tensor,
                  batch_data_samples: SampleList) -> tuple:
@@ -154,7 +155,7 @@ class TwoStageDetector(BaseDetector):
         Returns:
             dict: A dictionary of loss components
         """
-        x = self.extract_feat(batch_inputs)
+        x, feature_maps = self.extract_feat(batch_inputs)
 
         losses = dict()
 
@@ -222,7 +223,7 @@ class TwoStageDetector(BaseDetector):
         """
 
         assert self.with_bbox, 'Bbox head must be implemented.'
-        x = self.extract_feat(batch_inputs)
+        x, feature_maps = self.extract_feat(batch_inputs)
 
         # If there are no pre-defined proposals, use RPN to get proposals
         if batch_data_samples[0].get('proposals', None) is None:
@@ -238,5 +239,12 @@ class TwoStageDetector(BaseDetector):
 
         # connvert to DetDataSample
         results_list = self.convert_to_datasample(results_list)
+        # visualize feature map
+        name = ['layer_0', 'layer_1', 'layer_2', 'layer_3']
+        featmap_vis(
+            feature_maps=feature_maps,
+            batch_data_samples=batch_data_samples,
+            results_list=results_list,
+            name=name)
 
         return results_list

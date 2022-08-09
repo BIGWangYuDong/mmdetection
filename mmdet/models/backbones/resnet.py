@@ -630,6 +630,7 @@ class ResNet(BaseModule):
 
     def forward(self, x):
         """Forward function."""
+        feature_maps = []
         if self.deep_stem:
             x = self.stem(x)
         else:
@@ -641,9 +642,10 @@ class ResNet(BaseModule):
         for i, layer_name in enumerate(self.res_layers):
             res_layer = getattr(self, layer_name)
             x = res_layer(x)
+            feature_maps.append(x)
             if i in self.out_indices:
                 outs.append(x)
-        return tuple(outs)
+        return tuple(outs), tuple(feature_maps)
 
     def train(self, mode=True):
         """Convert the model into training mode while keep normalization layer

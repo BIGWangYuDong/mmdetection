@@ -6,6 +6,7 @@ from torch import Tensor
 from mmdet.registry import MODELS
 from mmdet.structures import OptSampleList, SampleList
 from mmdet.utils import ConfigType, OptConfigType, OptMultiConfig
+from mmdet.visualization import featmap_vis
 from .base import BaseDetector
 
 
@@ -106,10 +107,17 @@ class SingleStageDetector(BaseDetector):
                 - bboxes (Tensor): Has a shape (num_instances, 4),
                     the last dimension 4 arrange as (x1, y1, x2, y2).
         """
-        x = self.extract_feat(batch_inputs)
+        x, feature_maps = self.extract_feat(batch_inputs)
         results_list = self.bbox_head.predict(
             x, batch_data_samples, rescale=rescale)
         predictions = self.convert_to_datasample(results_list)
+        # visualize feature map
+        name = ['layer_0', 'layer_1', 'layer_2', 'layer_3']
+        featmap_vis(
+            feature_maps=feature_maps,
+            batch_data_samples=batch_data_samples,
+            results_list=results_list,
+            name=name)
         return predictions
 
     def _forward(
@@ -139,7 +147,7 @@ class SingleStageDetector(BaseDetector):
             tuple[Tensor]: Multi-level features that may have
             different resolutions.
         """
-        x = self.backbone(batch_inputs)
+        x, feature_maps = self.backbone(batch_inputs)
         if self.with_neck:
             x = self.neck(x)
-        return x
+        return x, feature_maps

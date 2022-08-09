@@ -9,6 +9,7 @@ from .lvis import LVISDataset, LVISV1Dataset, LVISV05Dataset
 from .openimages import OpenImagesChallengeDataset, OpenImagesDataset
 from .samplers import AspectRatioBatchSampler, ClassAwareSampler
 from .utils import get_loading_pipeline
+from .uw_detection import UWCocoDataset
 from .voc import VOCDataset
 from .wider_face import WIDERFaceDataset
 from .xml_style import XMLDataset
@@ -19,5 +20,5 @@ __all__ = [
     'WIDERFaceDataset', 'DATASETS', 'PIPELINES', 'build_dataset',
     'get_loading_pipeline', 'CocoPanopticDataset', 'MultiImageMixDataset',
     'OpenImagesDataset', 'OpenImagesChallengeDataset',
-    'AspectRatioBatchSampler', 'ClassAwareSampler'
+    'AspectRatioBatchSampler', 'ClassAwareSampler', 'UWCocoDataset'
 ]
