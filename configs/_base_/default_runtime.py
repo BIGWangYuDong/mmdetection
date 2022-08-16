@@ -19,7 +19,7 @@ visualizer = dict(
     type='DetLocalVisualizer',
     vis_backends=vis_backends,
     name='visualizer',
-    save_dir='work_dirs/vis')
+    save_dir='work_dirs/uw_vis/faster_1x/raw')
 log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 
 log_level = 'INFO'

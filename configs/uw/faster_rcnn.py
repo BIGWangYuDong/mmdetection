@@ -6,5 +6,11 @@ _base_ = [
 # model settings
 model = dict(roi_head=dict(bbox_head=dict(num_classes=4)))
 
+val_dataloader = dict(
+    dataset=dict(
+        ann_file='annotation_json/vis.json',
+        data_prefix=dict(img='1_uwdet_HE/')))
+test_dataloader = val_dataloader
+visualizer = dict(save_dir='work_dirs/uw_vis/faster_1x/1_he')
 # max keep 2 checkpoint
 checkpoint_config = dict(max_keep_ckpts=2)
