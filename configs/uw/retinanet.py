@@ -7,6 +7,13 @@ _base_ = [
 # model settings
 model = dict(bbox_head=dict(num_classes=4))
 
+val_dataloader = dict(
+    dataset=dict(
+        ann_file='annotation_json/vis.json',
+        data_prefix=dict(img='0_uwdet_RAW/')))
+test_dataloader = val_dataloader
+visualizer = dict(
+    save_dir='work_dirs/uw_vis/faster_1x/0_raw')
 # optimizer
 optim_wrapper = dict(
     optimizer=dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001))

@@ -9,8 +9,9 @@ model = dict(roi_head=dict(bbox_head=dict(num_classes=4)))
 val_dataloader = dict(
     dataset=dict(
         ann_file='annotation_json/vis.json',
-        data_prefix=dict(img='1_uwdet_HE/')))
+        data_prefix=dict(img='0_uwdet_RAW/')))
 test_dataloader = val_dataloader
-visualizer = dict(save_dir='work_dirs/uw_vis/faster_1x/1_he')
+visualizer = dict(
+    save_dir='work_dirs/uw_vis/faster_1x/0_raw')
 # max keep 2 checkpoint
 checkpoint_config = dict(max_keep_ckpts=2)

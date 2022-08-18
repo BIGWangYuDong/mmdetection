@@ -116,7 +116,7 @@ class SingleStageDetector(BaseDetector):
         featmap_vis(
             feature_maps=feature_maps,
             batch_data_samples=batch_data_samples,
-            results_list=results_list,
+            results_list=predictions,
             name=name)
         return predictions
 

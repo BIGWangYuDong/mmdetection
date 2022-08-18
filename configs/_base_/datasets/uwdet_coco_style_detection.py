@@ -1,6 +1,6 @@
 # dataset settings
 dataset_type = 'UWCocoDataset'
-data_root = 'data/UWDetData/'
+data_root = '/home/dong/BigDongDATA/DATA/UWDetData/'
 
 file_client_args = dict(backend='disk')
 

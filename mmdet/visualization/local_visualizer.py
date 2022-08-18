@@ -83,7 +83,7 @@ class DetLocalVisualizer(Visualizer):
                  text_color: Optional[Union[str,
                                             Tuple[int]]] = (200, 200, 200),
                  mask_color: Optional[Union[str, Tuple[int]]] = None,
-                 line_width: Union[int, float] = 3,
+                 line_width: Union[int, float] = 6,
                  alpha: float = 0.8):
         super().__init__(
             name=name,
@@ -141,6 +141,8 @@ class DetLocalVisualizer(Visualizer):
                 bboxes[:, 2] - bboxes[:, 0])
             scales = _get_adaptive_scales(areas)
 
+            from mmengine.visualization.utils import color_val_matplotlib
+            colors = color_val_matplotlib(colors)
             for i, (pos, label) in enumerate(zip(positions, labels)):
                 label_text = classes[
                     label] if classes is not None else f'class {label}'
@@ -152,9 +154,9 @@ class DetLocalVisualizer(Visualizer):
                     label_text,
                     pos,
                     colors=text_colors[i],
-                    font_sizes=int(13 * scales[i]),
+                    font_sizes=int(20 * scales[i]),
                     bboxes=[{
-                        'facecolor': 'black',
+                        'facecolor': colors[i],
                         'alpha': 0.8,
                         'pad': 0.7,
                         'edgecolor': 'none'
@@ -302,6 +304,7 @@ class DetLocalVisualizer(Visualizer):
             # TODO: Supported in mmengine's Viusalizer.
             out_file: Optional[str] = None,
             pred_score_thr: float = 0.3,
+            palette = None,
             step: int = 0) -> None:
         """Draw datasample and save to all backends.
 
@@ -332,7 +335,8 @@ class DetLocalVisualizer(Visualizer):
             step (int): Global step value to record. Defaults to 0.
         """
         classes = self.dataset_meta.get('CLASSES', None)
-        palette = self.dataset_meta.get('PALETTE', None)
+        if palette is None:
+            palette = self.dataset_meta.get('PALETTE', None)
 
         gt_img_data = None
         pred_img_data = None
@@ -359,7 +363,7 @@ class DetLocalVisualizer(Visualizer):
                 pred_instances = pred_instances[
                     pred_instances.scores > pred_score_thr].cpu()
                 pred_img_data = self._draw_instances(image, pred_instances,
-                                                     classes, palette)
+                                                     classes, [(0, 0, 0) for _ in range(4)])
             if 'pred_panoptic_seg' in pred_sample:
                 assert classes is not None, 'class information is ' \
                                             'not provided when ' \
