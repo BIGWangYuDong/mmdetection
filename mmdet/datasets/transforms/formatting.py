@@ -71,6 +71,14 @@ class PackDetInputs(BaseTransform):
             img = np.ascontiguousarray(img.transpose(2, 0, 1))
             packed_results['inputs'] = to_tensor(img)
 
+        if 'fft_filter_img' in results:
+            fft_filter_img = results['fft_filter_img']
+            if len(fft_filter_img.shape) < 3:
+                fft_filter_img = np.expand_dims(fft_filter_img, -1)
+            fft_filter_img = np.ascontiguousarray(
+                fft_filter_img.transpose(2, 0, 1))
+            packed_results['fft_filter_img'] = to_tensor(fft_filter_img)
+
         if 'gt_ignore_flags' in results:
             valid_idx = np.where(results['gt_ignore_flags'] == 0)[0]
             ignore_idx = np.where(results['gt_ignore_flags'] == 1)[0]

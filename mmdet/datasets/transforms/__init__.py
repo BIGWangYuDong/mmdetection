@@ -3,6 +3,7 @@ from .augment_wrappers import AutoAugment, RandAugment
 from .colorspace import (AutoContrast, Brightness, Color, ColorTransform,
                          Contrast, Equalize, Invert, Posterize, Sharpness,
                          Solarize, SolarizeAdd)
+from .fft import FFTFilter
 from .formatting import ImageToTensor, PackDetInputs, ToTensor, Transpose
 from .geometric import (GeomTransform, Rotate, ShearX, ShearY, TranslateX,
                         TranslateY)
@@ -29,5 +30,5 @@ __all__ = [
     'FilterAnnotations', 'Pad', 'GeomTransform', 'ColorTransform',
     'RandAugment', 'Sharpness', 'Solarize', 'SolarizeAdd', 'Posterize',
     'AutoContrast', 'Invert', 'MultiBranch', 'RandomErasing',
-    'LoadEmptyAnnotations', 'RandomOrder'
+    'LoadEmptyAnnotations', 'RandomOrder', 'FFTFilter'
 ]

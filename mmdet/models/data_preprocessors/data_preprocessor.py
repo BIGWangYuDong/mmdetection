@@ -107,6 +107,14 @@ class DetDataPreprocessor(ImgDataPreprocessor):
         Returns:
             dict: Data in the same format as the model input.
         """
+        fft_filter_img = None
+        if 'fft_filter_img' in data and training:
+            import copy
+            fake_data = copy.deepcopy(data)
+            fake_data['inputs'] = fake_data.pop('fft_filter_img')
+            fake_data = super().forward(data=fake_data, training=training)
+            fft_filter_img = fake_data['inputs']
+
         batch_pad_shape = self._get_pad_shape(data)
         data = super().forward(data=data, training=training)
         inputs, data_samples = data['inputs'], data['data_samples']
@@ -135,6 +143,10 @@ class DetDataPreprocessor(ImgDataPreprocessor):
             for batch_aug in self.batch_augments:
                 inputs, data_samples = batch_aug(inputs, data_samples)
 
+        if fft_filter_img is not None:
+            inputs = torch.cat([inputs, fft_filter_img], dim=0)
+            for i in range(len(data_samples)):
+                data_samples.append(data_samples[i])
         return {'inputs': inputs, 'data_samples': data_samples}
 
     def _get_pad_shape(self, data: dict) -> List[tuple]:
