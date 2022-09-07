@@ -11,3 +11,10 @@ train_pipeline = [
     dict(type='PackDetInputs')
 ]
 train_dataloader = dict(dataset=dict(pipeline=train_pipeline))
+
+model = dict(
+    rpn_head=dict(
+        loss_cls=dict(loss_weight=0.5), loss_bbox=dict(loss_weight=0.5)),
+    roi_head=dict(
+        bbox_head=dict(
+            loss_cls=dict(loss_weight=0.5), loss_bbox=dict(loss_weight=0.5))))

@@ -6,7 +6,7 @@ train_pipeline = [
         file_client_args={{_base_.file_client_args}}),
     dict(type='LoadAnnotations', with_bbox=True),
     dict(type='Resize', scale=(1333, 800), keep_ratio=True),
-    dict(type='FFTFilter', shape='cycle', pass_type='none', radius=16),
+    dict(type='FFTFilter', shape='cycle', pass_type='high', radius=16),
     dict(type='RandomFlip', prob=0.5),
     dict(type='PackDetInputs')
 ]
