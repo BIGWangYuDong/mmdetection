@@ -138,7 +138,8 @@ lr_config = dict(
     step=[28800, 57600, 86400, 115200, 144000])
 
 # Runner type
-runner = dict(_delete_=True, type='IterBasedRunner', max_iters=240000)
+runner = dict(type='IterBasedRunner', max_iters=240000)
+optimizer_config = dict(grad_clip=None)
 
 checkpoint_config = dict(interval=10000)
 evaluation = dict(interval=10000, metric=['bbox', 'segm'])
