@@ -38,10 +38,12 @@ class LoadImageFromFile:
                  to_float32=False,
                  color_type='color',
                  channel_order='bgr',
+                 backend='cv2',
                  file_client_args=dict(backend='disk')):
         self.to_float32 = to_float32
         self.color_type = color_type
         self.channel_order = channel_order
+        self.backend = backend
         self.file_client_args = file_client_args.copy()
         self.file_client = None
 
@@ -66,7 +68,8 @@ class LoadImageFromFile:
 
         img_bytes = self.file_client.get(filename)
         img = mmcv.imfrombytes(
-            img_bytes, flag=self.color_type, channel_order=self.channel_order)
+            img_bytes, flag=self.color_type, channel_order=self.channel_order,
+            backend=self.backend)
         if self.to_float32:
             img = img.astype(np.float32)
 
