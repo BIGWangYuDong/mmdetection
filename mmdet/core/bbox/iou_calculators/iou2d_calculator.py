@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
+from mmdet.utils import AvoidCUDAOOM
 from .builder import IOU_CALCULATORS
 
 
@@ -71,6 +72,7 @@ class BboxOverlaps2D:
         return repr_str
 
 
+@AvoidCUDAOOM.retry_if_cuda_oom
 def bbox_overlaps(bboxes1, bboxes2, mode='iou', is_aligned=False, eps=1e-6):
     """Calculate overlap between two set of bboxes.
 

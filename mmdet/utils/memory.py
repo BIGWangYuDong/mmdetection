@@ -45,6 +45,8 @@ def cast_tensor_type(inputs, src_type=None, dst_type=None):
             k: cast_tensor_type(v, src_type=src_type, dst_type=dst_type)
             for k, v in inputs.items()
         })
+    elif isinstance(inputs, str):
+        return inputs
     elif isinstance(inputs, abc.Iterable):
         return type(inputs)(
             cast_tensor_type(item, src_type=src_type, dst_type=dst_type)
