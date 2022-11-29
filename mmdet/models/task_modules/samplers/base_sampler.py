@@ -123,7 +123,11 @@ class BaseSampler(metaclass=ABCMeta):
                                                          dtype=torch.bool)
             add_gt_instances.pos_inds = priors.new_ones((num_gts, ),
                                                         dtype=torch.bool)
-            add_gt_instances.scores = priors.new_ones((num_gts, ))
+            for k, v in pred_instances.items():
+                if k not in add_gt_instances:
+                    shape = list(v.shape)
+                    shape[0] = num_gts
+                    add_gt_instances[k] = priors.new_ones(shape)
 
             pred_instances = pred_instances.cat(
                 [add_gt_instances,
