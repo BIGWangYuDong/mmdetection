@@ -249,12 +249,13 @@ class AnchorHead(BaseDenseHead):
         anchors = flat_anchors[inside_flags]
 
         pred_instances = InstanceData(priors=anchors)
-        assign_result = self.assigner.assign(pred_instances, gt_instances,
-                                             gt_instances_ignore)
+        pred_instances = self.assigner.assign(pred_instances, gt_instances,
+                                              gt_instances_ignore)
         # No sampling is required except for RPN and
         # Guided Anchoring algorithms
-        sampling_result = self.sampler.sample(assign_result, pred_instances,
-                                              gt_instances)
+        # TODO: delete PseudoSampler
+        # if get_sampler:
+        pred_instances = self.sampler.sample(pred_instances, gt_instances)
 
         num_valid_anchors = anchors.shape[0]
         target_dim = gt_instances.bboxes.size(-1) if self.reg_decoded_bbox \
@@ -268,22 +269,24 @@ class AnchorHead(BaseDenseHead):
                                   dtype=torch.long)
         label_weights = anchors.new_zeros(num_valid_anchors, dtype=torch.float)
 
-        pos_inds = sampling_result.pos_inds
-        neg_inds = sampling_result.neg_inds
+        pos_inds = pred_instances.pos_inds
+        neg_inds = pred_instances.neg_inds
         # `bbox_coder.encode` accepts tensor or box type inputs and generates
         # tensor targets. If regressing decoded boxes, the code will convert
         # box type `pos_bbox_targets` to tensor.
         if len(pos_inds) > 0:
+            pos_gt_bboxes = pred_instances.pos_gt_bboxes[pos_inds]
             if not self.reg_decoded_bbox:
+                pos_priors = pred_instances.priors[pos_inds]
                 pos_bbox_targets = self.bbox_coder.encode(
-                    sampling_result.pos_priors, sampling_result.pos_gt_bboxes)
+                    pos_priors, pos_gt_bboxes)
             else:
-                pos_bbox_targets = sampling_result.pos_gt_bboxes
-                pos_bbox_targets = get_box_tensor(pos_bbox_targets)
+                pos_bbox_targets = get_box_tensor(pos_gt_bboxes)
+
             bbox_targets[pos_inds, :] = pos_bbox_targets
             bbox_weights[pos_inds, :] = 1.0
 
-            labels[pos_inds] = sampling_result.pos_gt_labels
+            labels[pos_inds] = pred_instances.labels[pos_inds]
             if self.train_cfg['pos_weight'] <= 0:
                 label_weights[pos_inds] = 1.0
             else:
@@ -303,7 +306,7 @@ class AnchorHead(BaseDenseHead):
             bbox_weights = unmap(bbox_weights, num_total_anchors, inside_flags)
 
         return (labels, label_weights, bbox_targets, bbox_weights, pos_inds,
-                neg_inds, sampling_result)
+                neg_inds, pred_instances)
 
     def get_targets(self,
                     anchor_list: List[List[Tensor]],
@@ -384,17 +387,18 @@ class AnchorHead(BaseDenseHead):
             batch_gt_instances_ignore,
             unmap_outputs=unmap_outputs)
         (all_labels, all_label_weights, all_bbox_targets, all_bbox_weights,
-         pos_inds_list, neg_inds_list, sampling_results_list) = results[:7]
+         pos_inds_list, neg_inds_list, pred_instances_list) = results[:7]
         rest_results = list(results[7:])  # user-added return values
         # Get `avg_factor` of all images, which calculate in `SamplingResult`.
         # When using sampling method, avg_factor is usually the sum of
         # positive and negative priors. When using `PseudoSampler`,
         # `avg_factor` is usually equal to the number of positive priors.
         avg_factor = sum(
-            [results.avg_factor for results in sampling_results_list])
+            [results.avg_factor for results in pred_instances_list])
         # update `_raw_positive_infos`, which will be used when calling
         # `get_positive_infos`.
-        self._raw_positive_infos.update(sampling_results=sampling_results_list)
+        # TODO: check whether delete
+        self._raw_positive_infos.update(sampling_results=pred_instances_list)
         # split targets to a list w.r.t. multiple levels
         labels_list = images_to_levels(all_labels, num_level_anchors)
         label_weights_list = images_to_levels(all_label_weights,
@@ -406,7 +410,7 @@ class AnchorHead(BaseDenseHead):
         res = (labels_list, label_weights_list, bbox_targets_list,
                bbox_weights_list, avg_factor)
         if return_sampling_results:
-            res = res + (sampling_results_list, )
+            res = res + (pred_instances_list, )
         for i, r in enumerate(rest_results):  # user-added return values
             rest_results[i] = images_to_levels(r, num_level_anchors)
 

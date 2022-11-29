@@ -6,7 +6,7 @@ from torch import Tensor
 
 from mmdet.registry import MODELS, TASK_UTILS
 from mmdet.structures import DetDataSample
-from mmdet.structures.bbox import bbox2roi
+from mmdet.structures.bbox import bbox2roi, cat_boxes
 from mmdet.utils import ConfigType, InstanceList
 from ..task_modules.samplers import SamplingResult
 from ..utils import empty_instances, unpack_gt_instances
@@ -114,15 +114,14 @@ class StandardRoIHead(BaseRoIHead):
             rpn_results = rpn_results_list[i]
             rpn_results.priors = rpn_results.pop('bboxes')
 
-            assign_result = self.bbox_assigner.assign(
+            pred_instances = self.bbox_assigner.assign(
                 rpn_results, batch_gt_instances[i],
                 batch_gt_instances_ignore[i])
-            sampling_result = self.bbox_sampler.sample(
-                assign_result,
-                rpn_results,
+            pred_instances = self.bbox_sampler.sample(
+                pred_instances,
                 batch_gt_instances[i],
                 feats=[lvl_feat[i][None] for lvl_feat in x])
-            sampling_results.append(sampling_result)
+            sampling_results.append(pred_instances)
 
         losses = dict()
         # bbox head loss
@@ -182,7 +181,16 @@ class StandardRoIHead(BaseRoIHead):
                 - `bbox_feats` (Tensor): Extract bbox RoI features.
                 - `loss_bbox` (dict): A dictionary of bbox loss components.
         """
-        rois = bbox2roi([res.priors for res in sampling_results])
+        # priors
+        priors_list = []
+        for pred_instances in sampling_results:
+            pos_inds = pred_instances.pos_inds
+            neg_inds = pred_instances.neg_inds
+            pos_priors = pred_instances.priors[pos_inds]
+            neg_priors = pred_instances.priors[neg_inds]
+            priors_list.append(cat_boxes([pos_priors, neg_priors]))
+
+        rois = bbox2roi(priors_list)
         bbox_results = self._bbox_forward(x, rois)
 
         bbox_loss_and_target = self.bbox_head.loss_and_target(
@@ -218,6 +226,7 @@ class StandardRoIHead(BaseRoIHead):
                     proposals in the image.
                 - `loss_mask` (dict): A dictionary of mask loss components.
         """
+        # TODO: pos
         if not self.share_roi_extractor:
             pos_rois = bbox2roi([res.pos_priors for res in sampling_results])
             mask_results = self._mask_forward(x, pos_rois)

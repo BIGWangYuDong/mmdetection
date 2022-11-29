@@ -2,11 +2,11 @@
 from typing import Union
 
 import torch
+from mmengine.structures import InstanceData
 from numpy import ndarray
 from torch import Tensor
 
 from mmdet.registry import TASK_UTILS
-from ..assigners import AssignResult
 from .base_sampler import BaseSampler
 
 
@@ -70,7 +70,7 @@ class RandomSampler(BaseSampler):
             rand_inds = rand_inds.cpu().numpy()
         return rand_inds
 
-    def _sample_pos(self, assign_result: AssignResult, num_expected: int,
+    def _sample_pos(self, pred_instances: InstanceData, num_expected: int,
                     **kwargs) -> Union[Tensor, ndarray]:
         """Randomly sample some positive samples.
 
@@ -81,7 +81,7 @@ class RandomSampler(BaseSampler):
         Returns:
             Tensor or ndarray: sampled indices.
         """
-        pos_inds = torch.nonzero(assign_result.gt_inds > 0, as_tuple=False)
+        pos_inds = torch.nonzero(pred_instances.pos_inds > 0, as_tuple=False)
         if pos_inds.numel() != 0:
             pos_inds = pos_inds.squeeze(1)
         if pos_inds.numel() <= num_expected:
@@ -89,7 +89,7 @@ class RandomSampler(BaseSampler):
         else:
             return self.random_choice(pos_inds, num_expected)
 
-    def _sample_neg(self, assign_result: AssignResult, num_expected: int,
+    def _sample_neg(self, pred_instances: InstanceData, num_expected: int,
                     **kwargs) -> Union[Tensor, ndarray]:
         """Randomly sample some negative samples.
 
@@ -100,7 +100,7 @@ class RandomSampler(BaseSampler):
         Returns:
             Tensor or ndarray: sampled indices.
         """
-        neg_inds = torch.nonzero(assign_result.gt_inds == 0, as_tuple=False)
+        neg_inds = torch.nonzero(pred_instances.neg_inds > 0, as_tuple=False)
         if neg_inds.numel() != 0:
             neg_inds = neg_inds.squeeze(1)
         if len(neg_inds) <= num_expected:

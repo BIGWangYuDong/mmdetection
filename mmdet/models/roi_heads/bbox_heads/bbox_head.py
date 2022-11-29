@@ -222,7 +222,7 @@ class BBoxHead(BaseModule):
         return labels, label_weights, bbox_targets, bbox_weights
 
     def get_targets(self,
-                    sampling_results: List[SamplingResult],
+                    sampling_results: InstanceList,
                     rcnn_train_cfg: ConfigDict,
                     concat: bool = True) -> tuple:
         """Calculate the ground truth for all samples in a batch according to
@@ -262,10 +262,19 @@ class BBoxHead(BaseModule):
                 (num_proposals, 4) when `concat=False`, otherwise just a
                 single tensor has shape (num_all_proposals, 4).
         """
-        pos_priors_list = [res.pos_priors for res in sampling_results]
-        neg_priors_list = [res.neg_priors for res in sampling_results]
-        pos_gt_bboxes_list = [res.pos_gt_bboxes for res in sampling_results]
-        pos_gt_labels_list = [res.pos_gt_labels for res in sampling_results]
+        # get necessary elements
+        pos_priors_list = []
+        neg_priors_list = []
+        pos_gt_bboxes_list = []
+        pos_gt_labels_list = []
+        for pred_instances in sampling_results:
+            pos_inds = pred_instances.pos_inds
+            neg_inds = pred_instances.neg_inds
+            pos_priors_list.append(pred_instances.priors[pos_inds])
+            neg_priors_list.append(pred_instances.priors[neg_inds])
+            pos_gt_bboxes_list.append(pred_instances.pos_gt_bboxes[pos_inds])
+            pos_gt_labels_list.append(pred_instances.labels[pos_inds])
+
         labels, label_weights, bbox_targets, bbox_weights = multi_apply(
             self._get_targets_single,
             pos_priors_list,

@@ -80,23 +80,24 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
             usually including positive bboxes, positive labels, positive
             priors, etc.
         """
-        if len(self._raw_positive_infos) == 0:
-            return None
-
-        sampling_results = self._raw_positive_infos.get(
-            'sampling_results', None)
-        assert sampling_results is not None
-        positive_infos = []
-        for sampling_result in enumerate(sampling_results):
-            pos_info = InstanceData()
-            pos_info.bboxes = sampling_result.pos_gt_bboxes
-            pos_info.labels = sampling_result.pos_gt_labels
-            pos_info.priors = sampling_result.pos_priors
-            pos_info.pos_assigned_gt_inds = \
-                sampling_result.pos_assigned_gt_inds
-            pos_info.pos_inds = sampling_result.pos_inds
-            positive_infos.append(pos_info)
-        return positive_infos
+        raise NotImplementedError
+        # if len(self._raw_positive_infos) == 0:
+        #     return None
+        #
+        # sampling_results = self._raw_positive_infos.get(
+        #     'sampling_results', None)
+        # assert sampling_results is not None
+        # positive_infos = []
+        # for sampling_result in enumerate(sampling_results):
+        #     pos_info = InstanceData()
+        #     pos_info.bboxes = sampling_result.pos_gt_bboxes
+        #     pos_info.labels = sampling_result.pos_gt_labels
+        #     pos_info.priors = sampling_result.pos_priors
+        #     pos_info.pos_assigned_gt_inds = \
+        #         sampling_result.pos_assigned_gt_inds
+        #     pos_info.pos_inds = sampling_result.pos_inds
+        #     positive_infos.append(pos_info)
+        # return positive_infos
 
     def loss(self, x: Tuple[Tensor], batch_data_samples: SampleList) -> dict:
         """Perform forward propagation and loss calculation of the detection
