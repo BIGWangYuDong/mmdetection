@@ -21,11 +21,7 @@ This is an implementation of [DiffusionDet](https://github.com/ShoufaChen/Diffus
    python projects/DiffusionDet/model_converters/diffusiondet_resnet_to_mmdet.py ${DiffusionDet ckpt path} ${MMDetectron ckpt path}
    ```
 
-3. Testing the model in MMDetection.
-
-   ```shell
-   python tools/test.py projects/DiffusionDet/configs/diffusiondet_r50_fpn_500-proposals_1-step_crop-ms-480-800-450k_coco.py ${CHECKPOINT_PATH}
-   ```
+3. Following [Testing commands](#Testing-commands) to test the model in MMDetection.
 
 **Note:** During inference time, DiffusionDet will randomly generate noisy boxes,
 which may affect the AP results. If users want to get the same result every inference time, setting seed is a good way.
