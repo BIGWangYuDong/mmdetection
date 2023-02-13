@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from .base_det_dataset import BaseDetDataset
 from .cityscapes import CityscapesDataset
+from .class_balance_dataset import ClassBalancedDataset
 from .coco import CocoDataset
 from .coco_panoptic import CocoPanopticDataset
 from .crowdhuman import CrowdHumanDataset
@@ -23,5 +24,5 @@ __all__ = [
     'MultiImageMixDataset', 'OpenImagesDataset', 'OpenImagesChallengeDataset',
     'AspectRatioBatchSampler', 'ClassAwareSampler', 'MultiSourceSampler',
     'GroupMultiSourceSampler', 'BaseDetDataset', 'CrowdHumanDataset',
-    'Objects365V1Dataset', 'Objects365V2Dataset'
+    'Objects365V1Dataset', 'Objects365V2Dataset', 'ClassBalancedDataset'
 ]
